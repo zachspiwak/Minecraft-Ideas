@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Valentine</title>
+  <!-- Import custom Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Canvas-confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    /* Global Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: white;
+      text-align: center;
+      overflow: hidden;
+      padding: 20px;
+      transition: background-color 1s ease;
+      cursor: url('https://cdn.iconscout.com/icon/free/png-256/heart-156-457959.png'), auto;
+    }
+    #content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding-top: 10vh;
+      transition: all 1s ease;
+      position: relative;
+      z-index: 1;
+    }
+    /* Animated Gradient Background */
+    #bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: linear-gradient(45deg, #FFC0CB, #FFB6C1, #FF69B4);
+      background-size: 600% 600%;
+      animation: gradientAnimation 15s ease infinite;
+    }
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    /* Error Page Styles */
+    h1 {
+      font-size: 2.5rem;
+      color: #E60026;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    p {
+      font-size: 1.2rem;
+      color: #E60026;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+    /* Refresh Box Style */
+    #refreshBox {
+      background-color: #333;
+      color: #fff;
+      padding: 15px 30px;
+      display: inline-block;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      margin-top: 20px;
+    }
+    #refreshBox:hover {
+      background-color: #555;
+      transform: scale(1.05);
+    }
+    /* Button Styles */
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    #yesButton {
+      background-color: #E60026;
+      color: #fff;
+    }
+    #yesButton:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+    #noButton {
+      background-color: #999;
+      color: #333;
+      position: relative;
+    }
+    #noButton:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+    /* Header container for Valentine prompt with heartbeat animation */
+    .header-container {
+      margin-bottom: 20px;
+      color: #E60026;
+      animation: fadeInDown 1s ease, heartbeat 2s infinite ease 1s;
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    /* Custom message container with fade-in effect */
+    .message-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      color: #E60026;
+      animation: fadeIn 1s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    /* Floating hearts animation */
+    .floating-heart {
+      position: fixed;
+      bottom: -50px;
+      font-size: 2rem;
+      pointer-events: none;
+      animation: floatHeart linear forwards;
+    }
+    @keyframes floatHeart {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-600px) scale(1.5); opacity: 0; }
+    }
+    /* Rose petal animation */
+    .rose-petal {
+      position: fixed;
+      top: -50px;
+      font-size: 2rem;
+      pointer-events: none;
+      animation: fall 5s linear forwards;
+    }
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="content">
+    <h1>Error 404</h1>
+    <p>Page Not Found</p>
+    <div id="refreshBox" onclick="refreshPage()">Refresh Page</div>
+  </div>
+
+  <!-- Audio element for sound effect -->
+  <audio id="celebrationAudio" src="https://www.soundjay.com/misc/sounds/bell-ringing-01.mp3" preload="auto"></audio>
+
+  <script>
+    // Transition to the Valentine view and add the animated background
+    function refreshPage() {
+      // Add the background animation element if not present
+      if (!document.getElementById('bg-animation')) {
+        var bgAnim = document.createElement('div');
+        bgAnim.id = 'bg-animation';
+        document.body.appendChild(bgAnim);
+      }
+      document.getElementById('content').innerHTML = `
+        <div class="header-container">
+          <h1>WILL YOU BE MY VALENTINE? ❤️</h1>
+          <button id="yesButton" onclick="showMessage()">Yes! ❤️</button>
+          <button id="noButton" onclick="moveNoButton()">No 😢</button>
+        </div>
+      `;
+    }
+
+    // Display the custom message, play sound, trigger confetti, and launch extra animations
+    function showMessage() {
+      // Play celebration sound
+      document.getElementById('celebrationAudio').play();
+      // Trigger confetti effect
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      // Start floating hearts effect
+      startFloatingHearts();
+      // Start rose petals effect
+      startRosePetals();
+
+      let headerHTML = `
+        <div class="header-container">
+          <h1>WILL YOU BE MY VALENTINE? ❤️</h1>
+          <button id="yesButton" onclick="showMessage()">Yes! ❤️</button>
+        </div>
+      `;
+      let messageHTML = `
+        <div class="message-container">
+          <p><strong>Hey Libbie, this is your official invite to be my Valentine's Day date ❤️</strong></p>
+          <p>Make sure you bring your invitation to the date itself! <span style="font-size:0.8em;">❤️</span></p>
+          <p>I wanted to officially ask you to be my <strong>VALENTINE</strong> even though we talked about it earlier :) I know that this last semester is really busy for the both of us, so even if it's just a few hours, we'd be able to spend time together. Love you forever and always, zachypoo! ❤️</p>
+          <button onclick="replay()">Replay</button>
+        </div>
+      `;
+      document.getElementById('content').innerHTML = headerHTML + messageHTML;
+    }
+
+    // Smoothly move the "No" button to a random position on the screen
+    function moveNoButton() {
+      var noButton = document.getElementById('noButton');
+      var maxX = window.innerWidth - noButton.offsetWidth;
+      var maxY = window.innerHeight - noButton.offsetHeight;
+      var randomX = Math.floor(Math.random() * maxX);
+      var randomY = Math.floor(Math.random() * maxY);
+      noButton.style.position = "absolute";
+      noButton.style.left = randomX + "px";
+      noButton.style.top = randomY + "px";
+    }
+
+    // Create a single floating heart element
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.classList.add('floating-heart');
+      heart.innerText = "❤️";
+      heart.style.left = Math.random() * window.innerWidth + "px";
+      heart.style.animationDuration = 3 + Math.random() * 2 + "s";
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 5000);
+    }
+
+    // Start floating hearts effect for a short duration
+    function startFloatingHearts() {
+      const interval = setInterval(createHeart, 300);
+      setTimeout(() => clearInterval(interval), 3000);
+    }
+
+    // Create a single rose petal element
+    function createRosePetal() {
+      const petal = document.createElement('div');
+      petal.classList.add('rose-petal');
+      petal.innerText = "🌹";
+      petal.style.left = Math.random() * window.innerWidth + "px";
+      petal.style.animationDuration = 4 + Math.random() * 3 + "s";
+      document.body.appendChild(petal);
+      setTimeout(() => petal.remove(), 5000);
+    }
+
+    // Start rose petals effect for a short duration
+    function startRosePetals() {
+      const interval = setInterval(createRosePetal, 500);
+      setTimeout(() => clearInterval(interval), 5000);
+    }
+
+    // Replay function to restart the experience
+    function replay() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>
